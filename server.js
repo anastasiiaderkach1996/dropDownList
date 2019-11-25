@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 let db; 
+let country;
 
 const app = express();
 
@@ -24,6 +25,7 @@ MongoClient.connect('mongodb://localhost:27017',
         app.listen(3012,function() {
             console.log('API started')
         });
+        // add contries
         let countryList = [
             { countryName: 'Ukraine' },
             { countryName: 'Russia' },
@@ -38,6 +40,22 @@ MongoClient.connect('mongodb://localhost:27017',
                     console.log('Number of documents inserted :' + res.insertedCount)
             })};
         });
+        // add cities
+        let citiesList = [
+            {citiesName: 'Kyiv', country: 'Ukraine'},
+            {citiesName: 'Moscow', country: 'Russia'},
+            {citiesName: 'Krakow', country: 'Poland'},
+            {citiesName: 'London', country: 'England'},
+        ];
+        let cities = db.collection('cities');
+        cities.find().toArray(function(err, result){
+            if(result.length == 0) {
+                cities.insertMany(citiesList, function(err, res){
+                    if(err) throw err;
+                    console.log('Number of documents inserted :' + res.insertedCount)
+                });
+            };
+        });
     
 });
 
@@ -48,10 +66,16 @@ app.get('/', function(req, res) {
 
 app.get('/api/getCountry', function(req, res) {
     let country = db.collection('country');
-    country.find().toArray(function(err, result){
+    country.find().toArray((err, result) => {
         res.send(result)
     });
 });
 
+app.get('/api/cities/getCities', function(req,res){
+    let cities = db.collection('cities');
+    cities.find().toArray(function(err, result){
+        res.send(result)
+    })
+})
 
 
